@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator R&B</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            color: #ccc;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #0d0d0d;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+            width: 400px;
+            border: 1px solid #330000;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ff4d4d;
+            margin-bottom: 25px;
+            text-shadow: 0 0 5px #ff4d4d;
+        }
+
+        #input-container {
+            border: 1px solid #ff4d4d;
+            border-radius: 0;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #222;
+        }
+        
+        #expression-display {
+            font-size: 0.9em;
+            color: #a00;
+            min-height: 1.2em;
+            text-align: right;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+
+        #result-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+            text-align: right;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 18px 10px;
+            font-size: 1.2em;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background-color 0.1s, color 0.1s;
+        }
+
+        .btn:hover {
+            background-color: #444;
+            color: #ff4d4d;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .operator {
+            background-color: #8b0000;
+            color: #fff;
+        }
+        .operator:hover { 
+            background-color: #a00;
+            color: #fff;
+        }
+
+        .action-btn {
+            background-color: #555;
+            color: #ff4d4d;
+        }
+        .action-btn:hover { background-color: #666; }
+
+        .equals {
+            background-color: #ff4d4d;
+            color: #000;
+            grid-column: span 2;
+            font-weight: bold;
+        }
+        .equals:hover { background-color: #e00; }
+        
+        .extra-features {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .history-section, .memory-section {
+            flex: 1;
+            padding: 10px;
+            border-radius: 0;
+            background: #222;
+            border: 1px solid #ff4d4d;
+        }
+        
+        .history-section strong, .memory-section strong {
+            color: #ff4d4d;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            max-height: 80px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .memory-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .memory-buttons .btn {
+            padding: 6px;
+            font-size: 0.8em;
+            flex: 1;
+            background-color: #444;
+            color: #ff4d4d;
+        }
+        .memory-buttons .btn:hover {
+             background-color: #555;
+        }
+
+        .error {
+            color: #ff0000 !important;
+            font-size: 1.5em !important;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            .extra-features {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Kalkulator Mantra 💀</h2>
+        
+        <div id="input-container">
+            <div id="expression-display"></div>
+            <div id="result-display">0</div>
+        </div>
+        
+        <div class="buttons-grid">
+            <button class="btn action-btn" data-type="action" data-value="C">Batal</button>
+            <button class="btn action-btn" data-type="action" data-value="CE">Hapus</button>
+            <button class="btn action-btn" data-type="action" data-value="backspace">⌫</button>
+            <button class="btn operator" data-type="operator" data-value="/">÷</button>
+            
+            <button class="btn" data-type="number" data-value="7">7</button>
+            <button class="btn" data-type="number" data-value="8">8</button>
+            <button class="btn" data-type="number" data-value="9">9</button>
+            <button class="btn operator" data-type="operator" data-value="*">×</button>
+            
+            <button class="btn" data-type="number" data-value="4">4</button>
+            <button class="btn" data-type="number" data-value="5">5</button>
+            <button class="btn" data-type="number" data-value="6">6</button>
+            <button class="btn operator" data-type="operator" data-value="-">-</button>
+            
+            <button class="btn" data-type="number" data-value="1">1</button>
+            <button class="btn" data-type="number" data-value="2">2</button>
+            <button class="btn" data-type="number" data-value="3">3</button>
+            <button class="btn operator" data-type="operator" data-value="+">+</button>
+            
+            <button class="btn" data-type="number" data-value="0">0</button>
+            <button class="btn" data-type="decimal" data-value=".">.</button>
+            <button class="btn equals" data-type="equals" data-value="=">Panggil</button>
+        </div>
+
+        <div class="extra-features">
+            <div class="memory-section">
+                <strong>Gudang Memori (<span id="memory-value">0</span>)</strong>
+                <div class="memory-buttons">
+                    <button class="btn action-btn" data-type="memory" data-value="MC">MC</button>
+                    <button class="btn action-btn" data-type="memory" data-value="MR">MR</button>
+                    <button class="btn action-btn" data-type="memory" data-value="M+">M+</button>
+                    <button class="btn action-btn" data-type="memory" data-value="M-">M-</button>
+                </div>
+            </div>
+            
+            <div class="history-section">
+                <strong>Jejak Mantra (5 Terakhir)</strong>
+                <ul id="history-list" class="history-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const resultDisplay = document.getElementById('result-display');
+        const expressionDisplay = document.getElementById('expression-display');
+        const historyList = document.getElementById('history-list');
+        const memoryValueDisplay = document.getElementById('memory-value');
+
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = null;
+        let isNewInputNeeded = true;
+        let history = [];
+        let memoryValue = 0;
+        let errorState = false;
+
+        const opSymbols = { '+': '+', '-': '-', '*': '×', '/': '÷' };
+
+        function updateDisplay(result = currentInput) {
+            if (errorState) {
+                resultDisplay.innerText = result; 
+                resultDisplay.classList.add('error');
+                expressionDisplay.innerText = '';
+                return;
+            }
+            resultDisplay.classList.remove('error');
+
+            const formattedResult = parseFloat(result).toLocaleString('id-ID', { maximumFractionDigits: 10 });
+            resultDisplay.innerText = formattedResult;
+
+            let expressionText = '';
+            if (previousInput && operator) {
+                expressionText = `${parseFloat(previousInput).toLocaleString('id-ID', { maximumFractionDigits: 10 })} ${opSymbols[operator]}`;
+            }
+            expressionDisplay.innerText = expressionText;
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            operator = null;
+            isNewInputNeeded = true;
+            errorState = false;
+            updateDisplay();
+        }
+
+        function calculateResult() {
+            if (previousInput === '' || operator === null) return parseFloat(currentInput);
+            
+            const num1 = parseFloat(previousInput);
+            const num2 = parseFloat(currentInput);
+            
+            if (operator === '/') {
+                if (num2 === 0) {
+                    errorState = true;
+                    return 'Sihir Gagal';
+                }
+            }
+            
+            let result = 0;
+            try {
+                result = eval(`${num1} ${operator} ${num2}`);
+            } catch (e) {
+                errorState = true;
+                return 'Jampi Rusak';
+            }
+
+            return result;
+        }
+
+        function handleInput(type, value) {
+            if (errorState && type !== 'action') return;
+
+            switch (type) {
+                case 'number':
+                    if (isNewInputNeeded) {
+                        currentInput = value;
+                        isNewInputNeeded = false;
+                    } else if (currentInput === '0') {
+                        currentInput = value;
+                    } else {
+                        currentInput += value;
+                    }
+                    break;
+                case 'decimal':
+                    if (isNewInputNeeded) {
+                        currentInput = '0.';
+                        isNewInputNeeded = false;
+                    } else if (!currentInput.includes('.')) {
+                        currentInput += '.';
+                    }
+                    break;
+                case 'operator':
+                    if (previousInput && operator && !isNewInputNeeded) {
+                        handleEquals(); 
+                        previousInput = currentInput;
+                    } else if (!previousInput) {
+                        previousInput = currentInput;
+                    }
+                    operator = value;
+                    isNewInputNeeded = true;
+                    break;
+                case 'equals':
+                    if (previousInput && operator) {
+                        handleEquals();
+                    }
+                    return;
+                case 'action':
+                    if (value === 'C') {
+                        clearAll();
+                    } else if (value === 'CE') {
+                        currentInput = '0';
+                        isNewInputNeeded = true;
+                        errorState = false;
+                    } else if (value === 'backspace') {
+                        if (errorState) { clearAll(); return; }
+                        if (currentInput.length > 1 && !isNewInputNeeded) {
+                            currentInput = currentInput.slice(0, -1);
+                        } else {
+                            currentInput = '0';
+                            isNewInputNeeded = true;
+                        }
+                    }
+                    break;
+            }
+            updateDisplay();
+        }
+
+        function handleEquals() {
+            if (errorState) return;
+
+            if (previousInput === '' || operator === null) {
+                isNewInputNeeded = true;
+                updateDisplay();
+                return;
+            }
+            
+            const num1 = previousInput;
+            const num2 = currentInput;
+            const op = operator;
+            
+            const result = calculateResult();
+            
+            if (errorState) {
+                updateDisplay(result);
+                return;
+            }
+            
+            const calculation = `${num1.replace('.', ',')} ${opSymbols[op]} ${num2.replace('.', ',')} = ${result.toLocaleString('id-ID', { maximumFractionDigits: 10 })}`;
+            addToHistory(calculation);
+
+            currentInput = String(result);
+            previousInput = ''; 
+            operator = null; 
+            isNewInputNeeded = true; 
+            
+            updateDisplay();
+        }
+
+        function memory(action) {
+            if (errorState) return;
+            
+            const num = parseFloat(currentInput);
+            
+            if (action === 'MC') {
+                memoryValue = 0;
+            } else if (action === 'MR') {
+                currentInput = String(memoryValue);
+                isNewInputNeeded = true;
+            } else if (action === 'M+') {
+                if (!isNaN(num)) memoryValue += num;
+            } else if (action === 'M-') {
+                if (!isNaN(num)) memoryValue -= num;
+            }
+            
+            memoryValueDisplay.innerText = memoryValue.toLocaleString('id-ID', { maximumFractionDigits: 5 });
+            updateDisplay();
+        }
+        
+        function addToHistory(calculation) {
+            history.unshift(calculation); 
+            if (history.length > 5) history.pop(); 
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = history.map(item => `<li>${item}</li>`).join('');
+        }
+
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const type = this.getAttribute('data-type');
+                const value = this.getAttribute('data-value');
+                
+                if (type === 'memory') {
+                    memory(value);
+                } else {
+                    handleInput(type, value);
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            
+            if (/\d/.test(key)) {
+                handleInput('number', key);
+            } else if (key === '.') {
+                handleInput('decimal', key);
+            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                event.preventDefault();
+                handleInput('operator', key);
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault(); 
+                handleInput('equals', '=');
+            } else if (key.toLowerCase() === 'c' || key.toLowerCase() === 'delete') {
+                handleInput('action', 'C');
+            } else if (key === 'Backspace') {
+                handleInput('action', 'backspace');
+            }
+        });
+
+        clearAll();
+    </script>
+</body>
+</html>
